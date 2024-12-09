@@ -1,3 +1,5 @@
+FORKED FROM https://github.com/jjgonecrypto/chrome-envious (MIT LICENSE)
+
 # Chrome Envious
 Replace matching URL requests from one domain to another. Useful when you want to run local JS and CSS against a deployed environment.
 
