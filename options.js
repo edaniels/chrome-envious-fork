@@ -3,10 +3,14 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.storage.sync.get({
         match: 'https://example.com',
         replace: 'http://127.0.0.1:80',
+        wds: false,
+        webServerPort: 8080,
         compressed: false
     }, items => {
         document.querySelector('input[name=match]').value = items.match
         document.querySelector('input[name=replace]').value = items.replace
+        document.querySelector('input[name=wds]').value = items.wds
+        document.querySelector('input[name=webServerPort]').value = items.webServerPort
         document.querySelector('input[name=compressed]').value = items.compressed
     })
 
@@ -16,6 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
         chrome.storage.sync.set({
             match: getInput('match'),
             replace: getInput('replace'),
+            wds: getInput('wds'),
+            webServerPort: getInput('webServerPort'),
             compressed: getInput('compressed')
         }, chrome.runtime.reload)
     })

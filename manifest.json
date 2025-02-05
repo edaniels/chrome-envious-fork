@@ -9,11 +9,11 @@
   },
   "permissions": [
     "storage",
-    "declarativeNetRequest",
+    "declarativeNetRequestFeedback",
     "declarativeNetRequestWithHostAccess",
     "webRequest"
   ],
-  "host_permissions": ["*://*.mongodb.com/*", "*://*.mongodb-cdn.com/*"],
+  "host_permissions": ["*://*.mongodb.com/*", "*://*.mongodb-cdn.com/*", "*://localhost/*"],
   "optional_host_permissions": ["*://*/*"],
   "options_ui": {
     "page": "options.html",

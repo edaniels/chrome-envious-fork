@@ -2,68 +2,111 @@ chrome.storage.sync
   .get({
     match: "https://my-source.com",
     replace: "http://localhost:8080",
-    compressed: false,
+    wds: false,
+    webServerPort: 8080,
+    compressed: false
   })
-  .then(async ({ match, replace, compressed }) => {
-    // Bring these back when we fix css
-    // const replaceURL = new URL(replace);
-    // const urlWithDefaultPort = `${replaceURL.protocol}//${replaceURL.hostname}:8080`;
+  .then(async ({ match, replace, wds, webServerPort, compressed }) => {
+    const replaceURL = new URL(replace);
+    const likelyWebServerURL = `${replaceURL.protocol}//${replaceURL.hostname}:${webServerPort}`;
 
-    // Honestly, with Chrome v3 I'm not sure if this is impactful
-    const responseHeaders = [
-      { header: "Access-Control-Allow-Origin", operation: "set", value: "*" },
-      { header: "Access-Control-Allow-Headers", operation: "set", value: "*" },
-    ];
-
+    const isWDS = wds === "true";
     const isCompressed = compressed === "true";
+    const matchForRegex = match.replaceAll(/\./g, '\\.');
+    const likelyWebServerURLForRegex = likelyWebServerURL.replaceAll(/\./g, '\\.');
 
-    const jsRegex = `(account|admin|auth|main|project|ecosystem)(\.[a-fA-F0-9]*)${
-      isCompressed ? ".min" : ""
-    }(\.js)$`;
-    const cssRegex = `(\.[a-f0-9]{10})(?:\.min)?(\.css)`;
+    const genRegex = `^${matchForRegex}.*\/static\/([a-z]+)\/([^/]*)\\.[a-fA-F0-9]+\\..*$`;
+    const appAssetRegex = `^${matchForRegex}.*\/static\/([a-z]+)\/([a-z]+)\/(.*\\.[a-fA-F0-9]+)\\..*$`
+    const appAssetNoHashRegex = `^${matchForRegex}.*\/static\/([a-z]+)\/([a-z]+)\/(.*)\\.[a-fA-F0-9]+\\..*$`
 
     const oldRules = await chrome.declarativeNetRequest.getDynamicRules();
     const oldRuleIds = oldRules.map((rule) => rule.id);
 
+    // Uncomment for seeing matches (not a lot of info).
+    // chrome.declarativeNetRequest.onRuleMatchedDebug.addListener((info) => {
+    //   console.log(JSON.stringify(info))
+    // })
+
+    const addMin = (type) => {
+      return (isCompressed && type === 'js') ? '.min' : '';
+    }
+    const selectURLForRegexSub = (type) => {
+      return (isWDS && type === 'css') ? likelyWebServerURL : replace;
+    }
+    const makeGenAssetRegexSub = (type) => {
+      return `${selectURLForRegexSub(type)}/static/\\1/\\2${addMin(type)}.${type}`
+    }
+    const makeAppAssetRegexSub = (type) => {
+      return `${selectURLForRegexSub(type)}/static/\\1/\\2/\\3${addMin(type)}.${type}`
+    }
+    const cssAssetRegexSub = `${replace}/static/assets/css/\\1${addMin('css')}.css`
+
     chrome.declarativeNetRequest.updateDynamicRules({
       removeRuleIds: oldRuleIds,
       addRules: [
-        // {
-        // CSS is borked for now due to CORS - just don't rip it out yet
-        // id: 1,
-        // action: {
-        //   type: "redirect", // css
-        //   redirect: {
-        //     regexSubstitution: `${urlWithDefaultPort}\\1\\3`,
-        //   },
-        // },
-        // condition: {
-        //   regexFilter: `${match}(.*)${cssRegex}`,
-        //   resourceTypes: ["stylesheet", "xmlhttprequest"],
-        // },
-        // },
+        // JS
+        {
+          id: 1,
+          action: {
+            type: "redirect",
+            "redirect": { regexSubstitution: makeGenAssetRegexSub('js'), }
+          },
+          "condition": {
+            regexFilter: genRegex,
+            "resourceTypes": ["script"]
+          }
+        },
         {
           id: 2,
           action: {
-            type: "redirect", // js
-            redirect: {
-              regexSubstitution: `${replace}\\1\\2\\4`,
-            },
+            type: "redirect",
+            "redirect": { regexSubstitution: makeAppAssetRegexSub('js'), }
           },
-          condition: {
-            regexFilter: `${match}(.*)${jsRegex}`,
-            resourceTypes: ["script", "xmlhttprequest"],
-          },
+          "condition": {
+            regexFilter: appAssetRegex,
+            "resourceTypes": ["script"]
+          }
         },
+
+        // CSS
         {
           id: 3,
           action: {
-            type: "modifyHeaders",
-            responseHeaders,
+            type: "redirect",
+            redirect: {
+              regexSubstitution: makeGenAssetRegexSub('css'),
+            },
           },
           condition: {
-            urlFilter: match,
-            resourceTypes: ["script", "stylesheet", "xmlhttprequest", "other"],
+            regexFilter: genRegex,
+            resourceTypes: ["stylesheet", "xmlhttprequest"],
+          },
+        },
+        {
+          id: 4,
+          action: {
+            type: "redirect",
+            redirect: {
+              regexSubstitution: makeAppAssetRegexSub('css'),
+            },
+          },
+          condition: {
+            regexFilter: appAssetNoHashRegex,
+            resourceTypes: ["stylesheet", "xmlhttprequest"],
+          },
+        },
+        {
+          id: 5,
+          action: {
+            type: "modifyHeaders",
+            responseHeaders: [
+              { header: "Access-Control-Allow-Origin", operation: "set", value: "*" },
+              { header: "Access-Control-Allow-Headers", operation: "set", value: "*" },
+            ],
+          },
+          condition: {
+            urlFilter: isWDS ? likelyWebServerURL : replace,
+            resourceTypes: ["main_frame", "sub_frame", "stylesheet", "script", "image", "font", "object", "xmlhttprequest", "ping", "csp_report", "media", "websocket", "webtransport", "webbundle", "other"],
           },
         },
       ],
