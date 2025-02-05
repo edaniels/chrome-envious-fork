@@ -9,6 +9,7 @@ chrome.storage.sync
     // const replaceURL = new URL(replace);
     // const urlWithDefaultPort = `${replaceURL.protocol}//${replaceURL.hostname}:8080`;
 
+    // Honestly, with Chrome v3 I'm not sure if this is impactful
     const responseHeaders = [
       { header: "Access-Control-Allow-Origin", operation: "set", value: "*" },
       { header: "Access-Control-Allow-Headers", operation: "set", value: "*" },
