@@ -5,14 +5,15 @@ chrome.storage.sync
     compressed: false,
   })
   .then(async ({ match, replace, compressed }) => {
-    const replaceURL = new URL(replace);
+    // Bring these back when we fix css
+    // const replaceURL = new URL(replace);
+    // const urlWithDefaultPort = `${replaceURL.protocol}//${replaceURL.hostname}:8080`;
 
     const responseHeaders = [
       { header: "Access-Control-Allow-Origin", operation: "set", value: "*" },
       { header: "Access-Control-Allow-Headers", operation: "set", value: "*" },
     ];
 
-    const urlWithDefaultPort = `${replaceURL.protocol}//${replaceURL.hostname}:8080`;
     const isCompressed = compressed === "true";
 
     const jsRegex = `(account|admin|auth|main|project|ecosystem)(\.[a-fA-F0-9]*)${
