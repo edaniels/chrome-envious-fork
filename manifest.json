@@ -13,7 +13,7 @@
     "declarativeNetRequestWithHostAccess",
     "webRequest"
   ],
-  "host_permissions": ["*://*.mongodb.com/*", "*://*.mongodb-cdn.com/*", "*://localhost/*"],
+  "host_permissions": ["*://*/*"],
   "optional_host_permissions": ["*://*/*"],
   "options_ui": {
     "page": "options.html",

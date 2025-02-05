@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.storage.sync.get({
         match: 'https://example.com',
         replace: 'http://127.0.0.1:80',
-        wds: false,
+        wds: true,
         webServerPort: 8080,
         compressed: false
     }, items => {

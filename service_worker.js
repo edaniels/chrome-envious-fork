@@ -2,7 +2,7 @@ chrome.storage.sync
   .get({
     match: "https://my-source.com",
     replace: "http://localhost:8080",
-    wds: false,
+    wds: true,
     webServerPort: 8080,
     compressed: false
   })
