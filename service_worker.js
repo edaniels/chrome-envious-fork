@@ -27,20 +27,20 @@ chrome.storage.sync
     chrome.declarativeNetRequest.updateDynamicRules({
       removeRuleIds: oldRuleIds,
       addRules: [
-        {
-          // CSS is borked for now due to CORS - just don't rip it out yet
-          // id: 1,
-          // action: {
-          //   type: "redirect", // css
-          //   redirect: {
-          //     regexSubstitution: `${urlWithDefaultPort}\\1\\3`,
-          //   },
-          // },
-          condition: {
-            regexFilter: `${match}(.*)${cssRegex}`,
-            resourceTypes: ["stylesheet", "xmlhttprequest"],
-          },
-        },
+        // {
+        // CSS is borked for now due to CORS - just don't rip it out yet
+        // id: 1,
+        // action: {
+        //   type: "redirect", // css
+        //   redirect: {
+        //     regexSubstitution: `${urlWithDefaultPort}\\1\\3`,
+        //   },
+        // },
+        // condition: {
+        //   regexFilter: `${match}(.*)${cssRegex}`,
+        //   resourceTypes: ["stylesheet", "xmlhttprequest"],
+        // },
+        // },
         {
           id: 2,
           action: {
