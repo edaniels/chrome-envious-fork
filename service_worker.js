@@ -12,8 +12,6 @@ chrome.storage.sync
       { header: "Access-Control-Allow-Headers", operation: "set", value: "*" },
     ];
 
-    console.log(chrome.webRequest.OnHeadersReceivedOptions.EXTRA_HEADERS);
-
     const urlWithDefaultPort = `${replaceURL.protocol}//${replaceURL.hostname}:8080`;
     const isCompressed = compressed === "true";
 
@@ -29,13 +27,14 @@ chrome.storage.sync
       removeRuleIds: oldRuleIds,
       addRules: [
         {
-          id: 1,
-          action: {
-            type: "redirect", // css
-            redirect: {
-              regexSubstitution: `${urlWithDefaultPort}\\1\\3`,
-            },
-          },
+          // CSS is borked for now due to CORS - just don't rip it out yet
+          // id: 1,
+          // action: {
+          //   type: "redirect", // css
+          //   redirect: {
+          //     regexSubstitution: `${urlWithDefaultPort}\\1\\3`,
+          //   },
+          // },
           condition: {
             regexFilter: `${match}(.*)${cssRegex}`,
             resourceTypes: ["stylesheet", "xmlhttprequest"],
