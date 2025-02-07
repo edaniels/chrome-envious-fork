@@ -16,8 +16,8 @@ chrome.storage.sync
     const likelyWebServerURLForRegex = likelyWebServerURL.replaceAll(/\./g, '\\.');
 
     const genRegex = `^${matchForRegex}.*\/static\/([a-z]+)\/([^/]*)\\.[a-fA-F0-9]+\\..*$`;
-    const appAssetRegex = `^${matchForRegex}.*\/static\/([a-z]+)\/([a-z]+)\/(.*\\.[a-fA-F0-9]+)\\..*$`
-    const appAssetNoHashRegex = `^${matchForRegex}.*\/static\/([a-z]+)\/([a-z]+)\/(.*)\\.[a-fA-F0-9]+\\..*$`
+    const appAssetRegex = `^${matchForRegex}.*\/static\/([a-z]+)\/([a-z]+)\/(.*)\\.[a-fA-F0-9]+\\..*$`
+    const appAssetNoHashRegex = `^${matchForRegex}.*\/static\/([a-z]+)\/([a-z]+)\/(.*)\\..*$`
 
     const oldRules = await chrome.declarativeNetRequest.getDynamicRules();
     const oldRuleIds = oldRules.map((rule) => rule.id);
@@ -28,7 +28,7 @@ chrome.storage.sync
     // })
 
     const addMin = (type) => {
-      return (isCompressed && type === 'js') ? '.min' : '';
+      return isCompressed ? '.min' : '';
     }
     const selectURLForRegexSub = (type) => {
       return (isWDS && type === 'css') ? likelyWebServerURL : replace;
@@ -38,6 +38,10 @@ chrome.storage.sync
     }
     const makeAppAssetRegexSub = (type) => {
       return `${selectURLForRegexSub(type)}/static/\\1/\\2/\\3${addMin(type)}.${type}`
+    }
+    const makeAppAssetNoHashRegexSub = (type) => {
+      // min will show up in group 3, if needed.
+      return `${selectURLForRegexSub(type)}/static/\\1/\\2/\\3.${type}`
     }
     const cssAssetRegexSub = `${replace}/static/assets/css/\\1${addMin('css')}.css`
 
@@ -56,14 +60,15 @@ chrome.storage.sync
             "resourceTypes": ["script"]
           }
         },
+        // JS chunk redirected-to hashes
         {
           id: 2,
           action: {
             type: "redirect",
-            "redirect": { regexSubstitution: makeAppAssetRegexSub('js'), }
+            "redirect": { regexSubstitution: makeAppAssetNoHashRegexSub('js'), }
           },
           "condition": {
-            regexFilter: appAssetRegex,
+            regexFilter: appAssetNoHashRegex,
             "resourceTypes": ["script"]
           }
         },
@@ -91,7 +96,7 @@ chrome.storage.sync
             },
           },
           condition: {
-            regexFilter: appAssetNoHashRegex,
+            regexFilter: appAssetRegex,
             resourceTypes: ["stylesheet"],
           },
         },
