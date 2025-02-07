@@ -23,9 +23,9 @@ chrome.storage.sync
     const oldRuleIds = oldRules.map((rule) => rule.id);
 
     // Uncomment for seeing matches (not a lot of info).
-    chrome.declarativeNetRequest.onRuleMatchedDebug.addListener((info) => {
-      console.log(JSON.stringify(info))
-    })
+    // chrome.declarativeNetRequest.onRuleMatchedDebug.addListener((info) => {
+    //   console.log(JSON.stringify(info))
+    // })
 
     const addMin = (type) => {
       return isCompressed ? '.min' : '';
